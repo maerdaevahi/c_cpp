@@ -13,6 +13,8 @@
 // typedef void (*sighandler_t)(int);
 // sighandler_t signal(int signum, sighandler_t handler);
 
+// cat /proc/sys/net/ipv4/tcp_fin_timeout
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -32,6 +34,7 @@ void do_communication(int cfd);
 void determine_wstatus(int pid, int wstatus);
 void do_wait_child(int signo);
 void handle_upper_or_lowwer(char * ptr, int n);
+void test_port_reuse(int lfd);
 
 int main(int argc, char * argv[], char * envp[]) {
     int signum = SIGCHLD;
@@ -53,6 +56,7 @@ int main(int argc, char * argv[], char * envp[]) {
     addr.sin_port = htons(PORT);
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
     socklen_t addrlen = sizeof(addr);
+    test_port_reuse(lfd);
     int bind_ret = bind(lfd, (struct sockaddr *)&addr, addrlen);
     if (bind_ret == -1) {
         perror("bind");
@@ -87,6 +91,31 @@ int main(int argc, char * argv[], char * envp[]) {
         }
     }
     return 0;
+}
+
+void test_port_reuse(int lfd) {
+    int optval;
+    socklen_t optlen = sizeof(optval);
+    int ret = getsockopt(lfd, SOL_SOCKET, SO_REUSEADDR, &optval, &optlen);
+    if (ret == -1) {
+        perror("getsockopt1");
+        exit(1); 
+    }
+    printf("getsockopt1 %d\n", optval);
+    optval = 1;
+    ret = setsockopt(lfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+    if (ret == -1) {
+        perror("setsockopt");
+        exit(1); 
+    }
+    int optval1;
+    socklen_t optlen1 = sizeof(optval1);
+    ret = getsockopt(lfd, SOL_SOCKET, SO_REUSEADDR, &optval1, &optlen1);
+    if (ret == -1) {
+        perror("getsockopt2");
+        exit(1); 
+    }
+    printf("getsockopt2 %d\n", optval1);
 }
 
 void do_communication(int cfd) {
