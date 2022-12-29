@@ -31,6 +31,7 @@ typedef void (*sighandler_t)(int);
 void do_communication(int cfd);
 void determine_wstatus(int pid, int wstatus);
 void do_wait_child(int signo);
+void handle_upper_or_lowwer(char * ptr, int n);
 
 int main(int argc, char * argv[], char * envp[]) {
     int signum = SIGCHLD;
@@ -102,7 +103,24 @@ void do_communication(int cfd) {
             exit(1);
         } else {
             printf("server receives: %s\n", buf);
+            handle_upper_or_lowwer(buf, n);
+            n = write(cfd, buf, n);
+            if (n == -1) {
+                perror("write");
+                close(cfd);
+                exit(1);
+            }
             memset(buf, 0, sizeof(buf));
+        }
+    }
+}
+
+void handle_upper_or_lowwer(char * ptr, int n) {
+    for (int i = 0; i < n; ++i) {
+        if (ptr[i] >= 'a' && ptr[i] <= 'z') {
+            ptr[i] += DIFF;
+        } else if (ptr[i] >= 'A' && ptr[i] <= 'Z') {
+            ptr[i] -= DIFF;
         }
     }
 }
