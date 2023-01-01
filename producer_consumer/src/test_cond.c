@@ -120,3 +120,31 @@ void test_pthread_cond_timedwait() {
         printf("%d %d %d\n", i, retcode, ETIMEDOUT);
     }
 }
+
+void test_pthread_mutex_trylock() {
+    cond_resource resrc;
+    init_cond_resource(&resrc);
+    
+    int retcode;
+    
+    retcode = 0;
+    int i = 0;
+    struct timeval now;
+    struct timespec timeout;
+    gettimeofday(&now, NULL);
+    int j = 5;
+    while (1) {
+        int ret = pthread_mutex_trylock(&resrc.mutex);
+        if (ret) {
+            handle_error(ret, "pthread_mutex_trylock");
+        }
+        timeout.tv_sec = now.tv_sec + 3 * ++i;
+        timeout.tv_nsec = now.tv_usec * 1000;   
+        retcode = pthread_cond_timedwait(&resrc.not_full, &resrc.mutex, &timeout);
+        if (j--) {
+            pthread_mutex_unlock(&resrc.mutex);
+        }
+        printf("%d %d %d\n", i, retcode, ETIMEDOUT);
+    }
+}
+
