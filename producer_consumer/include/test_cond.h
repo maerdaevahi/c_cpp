@@ -12,4 +12,5 @@ void * consume(void * arg);
 void init_cond_resource(cond_resource * resrc);
 void destroy_cond_resource(cond_resource * resrc);
 void test_cond();
+void test_pthread_cond_timedwait();
 #endif

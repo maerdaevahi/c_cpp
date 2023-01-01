@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <sys/time.h>
+#include <errno.h>
 #include "test_cond.h"
 #include "handle_error.h"
 void test_cond() {
@@ -93,4 +95,28 @@ void destroy_cond_resource(cond_resource * resrc) {
     pthread_mutex_destroy(&resrc->mutex);
     pthread_cond_destroy(&resrc->not_empty);
     pthread_cond_destroy(&resrc->not_full);
+}
+
+void test_pthread_cond_timedwait() {
+    cond_resource resrc;
+    init_cond_resource(&resrc);
+    
+    int retcode;
+    
+    retcode = 0;
+    int i = 0;
+    struct timeval now;
+    struct timespec timeout;
+    gettimeofday(&now, NULL);
+    int j = 5;
+    while (1) {
+        pthread_mutex_lock(&resrc.mutex);
+        timeout.tv_sec = now.tv_sec + 3 * ++i;
+        timeout.tv_nsec = now.tv_usec * 1000;   
+        retcode = pthread_cond_timedwait(&resrc.not_full, &resrc.mutex, &timeout);
+        if (j--) {
+            pthread_mutex_unlock(&resrc.mutex);
+        }
+        printf("%d %d %d\n", i, retcode, ETIMEDOUT);
+    }
 }
