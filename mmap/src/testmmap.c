@@ -14,7 +14,8 @@
 static void testCommonMmap(int argc, char ** const argv);
 static void testAnonymousMmap(int argc, char ** const argv);
 /**
- * @brief a.txt的文件大小为0会报Bus error, mmap的prot参数隐含PROT_READ虽然pmap看不到PROT_READ
+ * @brief a.txt的文件大小为0会报Bus error(超出文件大小4K倍数上限，因为文件系统也是分块的), mmap的prot参数隐含PROT_READ虽然pmap看不到PROT_READ
+ * 超出length4K倍数上限会报段错误，在文件大小4K倍数上限和文件大小之间的部分操作会无效
  * 
  * @param argc 
  * @param argv 
@@ -22,8 +23,8 @@ static void testAnonymousMmap(int argc, char ** const argv);
  * @return int 
  */
 int main(int argc, char ** const argv, char ** const envp) {
-    //testCommonMmap(argc, argv);
-    testAnonymousMmap(argc, argv);
+    testCommonMmap(argc, argv);
+    //testAnonymousMmap(argc, argv);
     return 0;
 }
 
@@ -32,8 +33,8 @@ static void testCommonMmap(int argc, char ** const argv) {
         printf("argc != 3\n");
         exit(1);
     }
-
-    size_t length = 10;
+    
+    size_t length = 1 K;
 
     int prot;
     switch (atoi(argv[1])) {
@@ -85,6 +86,8 @@ static void testCommonMmap(int argc, char ** const argv) {
         printf("%c", ptr[i]);
         ptr[i] = 'b';
     }
+    ptr[4 K - 1] = 'a';
+    ptr[4 K] = 'a';
     int ret = munmap(ptr, length);
 }
 
