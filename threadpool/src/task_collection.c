@@ -56,16 +56,15 @@ void submit_task(task_collection * resrc, task * t) {
     pthread_mutex_unlock(&resrc->mutex);
 }
 
-void handle_task(task_collection * resrc) {
+void acquire_task(task_collection * resrc, task * t) {
     pthread_t thr_id = pthread_self();
     //printf("thread [%ld] %s %p\n", thr_id, __func__, resrc);
     pthread_mutex_lock(&resrc->mutex);
     while (test_task_queue_empty(&resrc->cq)) {
         pthread_cond_wait(&resrc->not_empty, &resrc->mutex);
     }
-    task t;
-    remove_from_task_queue(&resrc->cq, &t);
-    execute_task(&t);
+    remove_from_task_queue(&resrc->cq, t);
+    //execute_task(&t);
     
     //printf("%ld read %d\n", thr_id, resrc->cq.start);
     pthread_cond_signal(&resrc->not_full);

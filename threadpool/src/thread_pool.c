@@ -49,6 +49,8 @@ void commit_task(thread_pool * tp, task * t) {
 void * consume(void * arg) {
     task_collection * resrc = &((thread_pool *)arg)->task_col;
     while (1) {
-        handle_task(resrc);
+        task t;
+        acquire_task(resrc, &t);
+        execute_task(&t);
     }
 }

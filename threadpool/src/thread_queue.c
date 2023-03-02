@@ -35,6 +35,6 @@ void remove_from_thread_queue(thread_queue * cq, thread * t) {
     cq->start %= cq->size;
 }
 
-int count(thread_queue *  cq) {
+int count_thread(thread_queue *  cq) {
     return (cq->end -cq->start + cq->size) % cq->size;
 }

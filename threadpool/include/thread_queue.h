@@ -12,5 +12,5 @@ int test_thread_queue_full(thread_queue * cq);
 int test_thread_queue_empty(thread_queue * cq);
 void add_into_thread_queue(thread_queue * cq, thread * e);
 void remove_from_thread_queue(thread_queue * cq, thread * t);
-int count(thread_queue *  cq);
+int count_thread(thread_queue *  cq);
 #endif

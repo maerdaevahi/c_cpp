@@ -10,5 +10,5 @@ typedef struct task_collection {
 void init_task_collection(task_collection * resrc, int max_n_tasks);
 void destroy_task_collection(task_collection * resrc);
 void submit_task(task_collection * resrc, task * t);
-void handle_task(task_collection * resrc);
+void acquire_task(task_collection * resrc, task * t);
 #endif

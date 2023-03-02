@@ -1,5 +1,6 @@
 src=$(wildcard src/*.c)
 obj=$(patsubst %.c,%.o,$(src))
+.PHONY: all clean install
 all: testtp
 testtp: $(obj)
 	gcc -o $@ $^ -pthread
@@ -10,4 +11,3 @@ install:
 clean:
 	find src ! -name src ! -name *.c -exec rm -rf {} \;
 	rm -rf target/*
-.PHONY: all clean install

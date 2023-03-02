@@ -35,6 +35,6 @@ void remove_from_task_queue(task_queue * cq, task * t) {
     cq->start %= cq->size;
 }
 
-int count(task_queue * cq) {
+int count_task(task_queue * cq) {
     return (cq->end -cq->start + cq->size) % cq->size;
 }
