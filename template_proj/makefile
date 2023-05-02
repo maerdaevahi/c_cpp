@@ -1,6 +1,7 @@
 SRC_DIR := src
 TARGET_DIR := target
 INCLUDE := include
+CC := g++
 
 srcs := $(wildcard $(SRC_DIR)/*.cc)
 objs := $(patsubst $(SRC_DIR)/%.cc,$(TARGET_DIR)/%.o,$(srcs))
@@ -10,9 +11,9 @@ apps := $(patsubst $(SRC_DIR)/%.cc,$(TARGET_DIR)/%,$(srcs))
 all: $(apps)
 
 %: %.o
-	g++ -o $@ $<
+	$(CC) -o $@ $<
 $(objs): $(TARGET_DIR)/%.o: $(SRC_DIR)/%.cc
-	g++	-c -g -o $@ $<
+	$(CC)	-c -g -o $@ $<
 clean:
 	rm -rf $(objs) $(apps)
 
