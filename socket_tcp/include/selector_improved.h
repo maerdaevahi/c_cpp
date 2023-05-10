@@ -1,5 +1,5 @@
-#ifndef SELECTOR
-#define SELECTOR
+#ifndef SELECTOR_IMPROVED
+#define SELECTOR_IMPROVED
 #include "http.h"
 #include <map>
 #include <vector>
