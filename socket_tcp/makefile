@@ -17,7 +17,7 @@ $(TARGET_DIR)/main: $(objs)
 %: %.o
 	$(CC) -o $@ $<
 $(objs): $(TARGET_DIR)/%.o: $(SRC_DIR)/%.cc
-	$(CC) -c -g -fPIC  -o $@ -I $(INCLUDE) $<
+	$(CC) -c -g -fPIC -I $(INCLUDE) -o $@  $<
 mpnet: $(TARGET_DIR)/base_socket.o
 	$(CC) -shared -o $(TARGET_DIR)/$(LIBRARY_PREFIX)$@$(DYNAMIC_LIBRARY_SUFFIX) $<
 main1:

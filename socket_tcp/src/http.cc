@@ -48,23 +48,13 @@ int http_request::parse_request_body_if_necessary(char * tmp, char * end) {
 
 int http_request::decode() {
     char tmp[BUFSIZ];
-#ifdef TEST
     int count = readln(fd, tmp, sizeof(tmp));
-#else
-    operation_context oc;
-    init_oc(&oc, fd);
-    int count = read_line(&oc, tmp, sizeof(tmp));
-#endif
     if (!count) {
         return 0;
     }
     tmp[count] = 0;
     parse_request_line(tmp);
-#ifdef TEST
     while ((count = readln(fd, tmp, sizeof(tmp))) > 0) {
-#else
-    while ((count = read_line(&oc, tmp, sizeof(tmp))) > 0) {
-#endif
         if (!count) {
             return 0;
         }
@@ -132,7 +122,7 @@ void do_http(int fd) {
     close(fd);
 }
 void mk_http(net_app * app, const char * ip, int port) {
-    app->fd = open_ipv4_tcp_socket(ip, port);
+    app->fd = open_ipv4_tcp_listen_socket(ip, port);
     app->ac = accept_connection;
     app->com = do_http;
 }

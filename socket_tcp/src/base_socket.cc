@@ -9,19 +9,15 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int open_ipv4_tcp_socket(const char * ip, int port) {
-    int fd = create_ipv4_tcp_socket();
+int open_ipv4_tcp_listen_socket(const char * ip, int port) {
+    int fd = open_ipv4_tcp_socket();
     enable_addr_reusable(fd);
     bind_addr(fd, ip, port);
     set_listen(fd, BACK_LOG);
     return fd;
 }
-int create_ipv4_tcp_socket() {
+int open_ipv4_tcp_socket() {
     int domain = AF_INET, type = SOCK_STREAM, protocol = 0;
-    return create_socket (domain, type, protocol);
-}
-
-int create_socket(int domain, int type, int protocol) {
     int fd = socket(domain, type, protocol);
     PERROR_EXIT_CONDITIONAL(fd, "socket", 1);
     return fd;
@@ -182,92 +178,6 @@ void set_block(int client_fd) {
     if (ret == -1) {
         perror("fcntl");
     }
-}
-
-void init_oc(operation_context * oc, int fd) {
-    oc->fd = fd;
-    oc->error_no = 0;
-    oc->size = sizeof(oc->buf);
-    oc->count = 0;
-    oc->ret = 0;
-    oc->msg = NULL;
-}
-
-int read_line(operation_context * oc, char * buf, int count) {
-    printf("%s\n", __func__);
-    char * ptr = oc->buf;
-    char * pos = oc->buf + oc->count;
-    int left_count = oc->size - oc->count;
-    for (; ptr < pos; ++ptr) {
-        if (*ptr == '\n') {
-            break;
-        }
-    }
-    if (ptr < pos) {
-        int n = ptr - oc->buf + 1;
-        if (n > count) {
-            return 0;
-        }
-        strncpy(buf, oc->buf, n);
-        int m = pos - ptr -1;
-        // strncpy内存有重叠会有问题
-        //strncpy(oc->buf, ptr + 1, m);
-        for (int i = 0; i < m; ++i) {
-            oc->buf[i] = (ptr + 1)[i];
-        }
-        oc->count = m;
-        return n;
-    }
-    while (left_count > 0) {
-        oc->ret = read(oc->fd, pos, left_count);
-        if (oc->ret == -1) {
-            if (errno == EINTR) {
-                printf("eintr\n");
-                continue;
-            } else if (errno == EAGAIN) {
-                break;
-            }
-            perror("read");
-            return -1;
-        } else if (!oc->ret) {
-            printf("fd ends\n");
-            close(oc->fd);
-            break;
-        } else {
-            char * ptr = pos;
-            pos += oc->ret;
-            left_count -= oc->ret;
-            for (; ptr < pos; ++ptr) {
-                if (*ptr == '\n') {
-                    break;
-                }
-            }
-            if (ptr < pos) {
-                int n = ptr - oc->buf + 1;
-                if (n > count) {
-                    return 0;
-                }
-                strncpy(buf, oc->buf, n);
-                int m = pos - ptr -1;
-                // strncpy内存有重叠会有问题
-                //strncpy(oc->buf, ptr + 1, m);
-                for (int i = 0; i < m; ++i) {
-                    oc->buf[i] = (ptr + 1)[i];
-                }
-                oc->count = m;
-                return n;
-            }
-        }
-    }
-    int n = oc->size - left_count;
-    if (n > count) {
-        return 0;
-    }
-    strncpy(buf, oc->buf, n);
-    oc->count = 0;
-    oc->error_no = errno;
-    oc->msg = __func__;
-    return n;
 }
 #ifdef __cplusplus
 }
