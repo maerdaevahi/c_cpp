@@ -53,6 +53,24 @@ int accept_connection(int listen_fd) {
     return client_fd;
 }
 
+
+int read_n(int peer_fd, char * buf, int n) {
+    char * pos = buf;
+    char * end = buf + n;
+    while (pos < end) {
+        int count = recv(peer_fd, pos, end - pos, 0);
+        if (count > 0) {
+            pos += count;
+        } else if (!count) {
+            close(peer_fd);
+            break;
+        } else if (count == -1 && (errno == EAGAIN|| errno == EINTR)) {
+            continue;
+        }
+    }
+    return pos - buf;
+}
+
 int readn(int fd, char * buf, int count) {
     int left_count = count;
     char * pos = buf;
